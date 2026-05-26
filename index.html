@@ -1,0 +1,1218 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora de Precificação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabler-icons@latest/iconfont/tabler-icons.min.css" />
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: #eef5ff;
+        --bg: #eef5ff;
+        --surface: #ffffff;
+        --surface-strong: #f8fbff;
+        --border: rgba(15, 23, 42, 0.08);
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-tertiary: #64748b;
+        --accent: #2563eb;
+        --accent-soft: #e0efff;
+        --success: #16a34a;
+        --success-soft: #dcfce7;
+        --warning: #f97316;
+        --danger: #ef4444;
+        --shadow: 0 22px 70px rgba(15, 23, 42, 0.08);
+        --radius: 24px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 32%),
+          linear-gradient(180deg, #f6faff 0%, #eef5ff 100%);
+        color: var(--text-primary);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .app {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 24px 20px 40px;
+      }
+
+      .hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 24px;
+        padding: 22px 24px;
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .brand-badge {
+        width: 46px;
+        height: 46px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #2563eb 0%, #93c5fd 100%);
+        display: grid;
+        place-items: center;
+        color: white;
+        font-size: 22px;
+      }
+
+      .brand-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .brand-sub {
+        margin: 6px 0 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .button,
+      .secondary-button {
+        border: none;
+        border-radius: 14px;
+        padding: 12px 18px;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .secondary-button.small {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        min-width: 40px;
+      }
+
+      .button {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+      }
+
+      .secondary-button {
+        background: white;
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+      }
+
+      .secondary-button:hover {
+        background: var(--surface-strong);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .metric-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 18px 20px;
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.04);
+      }
+
+      .metric-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+      }
+
+      .metric-value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .metric-value.positive {
+        color: var(--success);
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .row2,
+      .row3 {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .row2 {
+        grid-template-columns: 2fr 1fr;
+      }
+
+      .row3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .field label {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+      }
+
+      .field input[type='text'],
+      .field input[type='number'] {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 16px;
+        background: var(--surface-strong);
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .field input:focus {
+        border-color: rgba(37, 99, 235, 0.4);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+      }
+
+      .margin-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 14px;
+        padding-top: 6px;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 18px;
+      }
+
+      .margin-row label {
+        font-size: 0.92rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+      }
+
+      .margin-row input[type='range'] {
+        width: 100%;
+      }
+
+      .margin-badge {
+        min-width: 54px;
+        text-align: right;
+        color: var(--text-primary);
+        font-weight: 700;
+      }
+
+      .preview-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 18px;
+      }
+
+      .preview-row strong {
+        color: var(--text-primary);
+      }
+
+      .preview-price {
+        font-weight: 700;
+        color: var(--success);
+      }
+
+      .btn-add {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 16px;
+        padding: 14px 22px;
+        border: none;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.15s ease, filter 0.15s ease;
+      }
+
+      .btn-add:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+      }
+
+      .message {
+        margin-top: 16px;
+        font-size: 0.92rem;
+        color: var(--text-secondary);
+        min-height: 1.25rem;
+      }
+
+      .message.success {
+        color: var(--success);
+      }
+
+      .message.error {
+        color: var(--danger);
+      }
+
+      .empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1rem;
+        color: var(--text-secondary);
+        font-size: 0.96rem;
+        gap: 12px;
+        border: 1px dashed var(--border);
+        border-radius: 22px;
+        background: var(--surface-strong);
+      }
+
+      .empty i {
+        font-size: 34px;
+        color: rgba(71, 85, 105, 0.65);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        table-layout: fixed;
+      }
+
+      th,
+      td {
+        padding: 12px 12px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-primary);
+      }
+
+      th {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-align: left;
+        letter-spacing: 0.02em;
+      }
+
+      th.num,
+      td.num {
+        text-align: right;
+      }
+
+      tr:hover td {
+        background: var(--surface-strong);
+      }
+
+      .pname {
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 58px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .bg {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .bm {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .br {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .del {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 8px;
+        border-radius: 14px;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .del:hover {
+        background: var(--surface-strong);
+        color: var(--text-primary);
+      }
+
+      .chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 260px;
+        margin-top: 16px;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.45);
+        padding: 20px;
+        z-index: 30;
+      }
+
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .mini-calc {
+        width: min(420px, 100%);
+        background: var(--surface);
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .mini-calc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 20px;
+        background: #f8fbff;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mini-calc-header h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .mini-calc-header button {
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        cursor: pointer;
+      }
+
+      .mini-calc-screen {
+        min-height: 92px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        background: #eef5ff;
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        font-weight: 700;
+        text-align: right;
+        word-break: break-all;
+      }
+
+      .mini-calc-screen small {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .mini-calc-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        padding: 18px;
+        background: var(--surface);
+      }
+
+      .mini-calc-button {
+        border: none;
+        border-radius: 16px;
+        padding: 18px 0;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        background: var(--surface-strong);
+        color: var(--text-primary);
+        transition: transform 0.15s ease, background 0.15s ease;
+      }
+
+      .mini-calc-button.operator {
+        background: var(--accent);
+        color: white;
+      }
+
+      .mini-calc-button.clear {
+        background: #f8d7da;
+        color: #b91c1c;
+      }
+
+      .mini-calc-button:hover {
+        transform: translateY(-1px);
+      }
+
+      .mini-calc-button.wide {
+        grid-column: span 2;
+      }
+
+      .tip {
+        margin-top: 14px;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+
+      .qty-field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .qty-field button {
+        border: 1px solid var(--border);
+        width: 36px;
+        height: 36px;
+        border-radius: 14px;
+        background: var(--surface-strong);
+        cursor: pointer;
+        color: var(--text-secondary);
+      }
+
+      .qty-field button:hover {
+        background: var(--surface);
+      }
+
+      .qty-num {
+        min-width: 44px;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      @media (max-width: 840px) {
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .row2,
+        .row3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .hero {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .hero-actions {
+          width: 100%;
+          justify-content: stretch;
+        }
+
+        .button,
+        .secondary-button,
+        .btn-add {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="hero" aria-label="Painel principal da calculadora">
+        <div class="brand">
+          <div class="brand-badge">💡</div>
+          <div>
+            <h1 class="brand-title">Calculadora de Precificação</h1>
+            <p class="brand-sub">Organize custo, margem e lucro para sua loja de personalizados.</p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button type="button" class="secondary-button" id="clearBtn" onclick="clearAll()" disabled>
+            <i class="ti ti-trash"></i> Limpar tudo
+          </button>
+          <button type="button" class="secondary-button" onclick="openMiniCalc()">
+            <i class="ti ti-calculator"></i> Calculadora rápida
+          </button>
+          <button type="button" class="button" id="exportBtn" onclick="exportCSV()" disabled>
+            <i class="ti ti-download"></i> Exportar CSV
+          </button>
+        </div>
+      </section>
+
+      <section class="metrics" aria-label="Indicadores gerais">
+        <article class="metric-card">
+          <div class="metric-label"><i class="ti ti-package"></i> Produtos</div>
+          <div class="metric-value" id="mProd">0</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label"><i class="ti ti-shopping-cart"></i> Itens totais</div>
+          <div class="metric-value" id="mItems">0</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label"><i class="ti ti-wallet"></i> Custo total</div>
+          <div class="metric-value" id="mCost">R$ 0,00</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label"><i class="ti ti-cash"></i> Receita estimada</div>
+          <div class="metric-value" id="mRev">R$ 0,00</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label"><i class="ti ti-trending-up"></i> Lucro estimado</div>
+          <div class="metric-value positive" id="mProfit">R$ 0,00</div>
+        </article>
+      </section>
+
+      <section class="panel" aria-label="Cadastro de novo produto">
+        <div class="panel-title"><i class="ti ti-plus"></i> Novo produto</div>
+        <div class="row2">
+          <div class="field">
+            <label for="pName">Nome do produto</label>
+            <input type="text" id="pName" placeholder="Caneca personalizada" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Quantidade</label>
+            <div class="qty-field">
+              <button type="button" onclick="changeQty(-1)" aria-label="Diminuir">−</button>
+              <span class="qty-num" id="qtyDisplay">1</span>
+              <button type="button" onclick="changeQty(1)" aria-label="Aumentar">+</button>
+              <input type="hidden" id="pQty" value="1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row3">
+          <div class="field">
+            <label for="pMat">Material (R$)</label>
+            <input type="number" id="pMat" placeholder="0,00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label for="pProd">Produção / mão de obra (R$)</label>
+            <input type="number" id="pProd" placeholder="0,00" min="0" step="0.01" />
+          </div>
+          <div class="field">
+            <label for="pOut">Outros (frete, emb.) (R$)</label>
+            <input type="number" id="pOut" placeholder="0,00" min="0" step="0.01" />
+          </div>
+        </div>
+
+        <div class="margin-row">
+          <label for="slider"><i class="ti ti-percentage"></i> Margem desejada</label>
+          <input type="range" id="slider" min="5" max="200" step="1" value="50" />
+          <span class="margin-badge" id="sliderVal">50%</span>
+        </div>
+
+        <div class="preview-row" id="preview"></div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+          <button type="button" class="btn-add" onclick="addProduct()">
+            <i class="ti ti-circle-check"></i> <span id="actionButtonText">Adicionar à lista</span>
+          </button>
+          <button type="button" class="secondary-button" id="cancelEditBtn" onclick="cancelEdit()" style="display:none;">
+            <i class="ti ti-x"></i> Cancelar
+          </button>
+        </div>
+
+        <div id="message" class="message" aria-live="polite"></div>
+      </section>
+
+      <section class="panel" id="listPanel" aria-label="Lista de produtos cadastrados">
+        <div class="panel-title"><i class="ti ti-list"></i> Lista de produtos</div>
+        <div id="listBody">
+          <div class="empty"><i class="ti ti-inbox"></i> Nenhum produto cadastrado ainda</div>
+        </div>
+      </section>
+
+      <section class="panel" id="chartPanel" style="display:none" aria-label="Gráfico de rentabilidade">
+        <div class="panel-title"><i class="ti ti-chart-bar"></i> Rentabilidade por produto</div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:0.88rem;color:var(--text-secondary);margin-bottom:8px;">
+          <span style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:2px;background:#97c459;display:inline-block;"></span> Custo</span>
+          <span style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:2px;background:#1d9e75;display:inline-block;"></span> Lucro</span>
+        </div>
+        <div class="chart-wrap"><canvas id="profChart" role="img" aria-label="Gráfico de barras mostrando custo e lucro por produto"></canvas></div>
+        <p class="tip">* Valores calculados com base na quantidade × preço unitário de cada produto.</p>
+      </section>
+
+      <div class="modal-overlay" id="miniCalcModal" role="dialog" aria-modal="true" aria-labelledby="miniCalcTitle">
+        <div class="mini-calc">
+          <div class="mini-calc-header">
+            <h2 id="miniCalcTitle">Calculadora rápida</h2>
+            <button type="button" onclick="closeMiniCalc()" aria-label="Fechar calculadora">✕</button>
+          </div>
+          <div class="mini-calc-screen" id="calcScreen">
+            <small id="calcExpression"></small>
+            <span id="calcResult">0</span>
+          </div>
+          <div class="mini-calc-buttons">
+            <button class="mini-calc-button clear" type="button" onclick="calculatorInput('C')">C</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('⌫')">⌫</button>
+            <button class="mini-calc-button operator" type="button" onclick="calculatorInput('%')">%</button>
+            <button class="mini-calc-button operator" type="button" onclick="calculatorInput('/')">÷</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('7')">7</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('8')">8</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('9')">9</button>
+            <button class="mini-calc-button operator" type="button" onclick="calculatorInput('*')">×</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('4')">4</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('5')">5</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('6')">6</button>
+            <button class="mini-calc-button operator" type="button" onclick="calculatorInput('-')">−</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('1')">1</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('2')">2</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('3')">3</button>
+            <button class="mini-calc-button operator" type="button" onclick="calculatorInput('+')">+</button>
+            <button class="mini-calc-button wide" type="button" onclick="calculatorInput('0')">0</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput('.')">.</button>
+            <button class="mini-calc-button operator" type="button" onclick="calculatorInput('=')">=</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script>
+      const products = [];
+      let chart = null;
+      let editId = null;
+      let calcExpression = '';
+
+      function fmt(value) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+
+      function calcPrice(cost, margin) {
+        return cost * (1 + margin / 100);
+      }
+
+      function profit(cost, price) {
+        return price - cost;
+      }
+
+      function formatPercent(value) {
+        return Number.isFinite(value) ? value.toFixed(1) : '0.0';
+      }
+
+      function badgeClass(margin) {
+        return margin >= 40 ? 'bg' : margin >= 20 ? 'bm' : 'br';
+      }
+
+      function showMessage(text, type = '') {
+        const message = document.getElementById('message');
+        message.textContent = text;
+        message.className = type ? `message ${type}` : 'message';
+        if (!text) return;
+        clearTimeout(showMessage.timeoutId);
+        showMessage.timeoutId = setTimeout(() => {
+          message.textContent = '';
+          message.className = 'message';
+        }, 4200);
+      }
+
+      function getInputs() {
+        const mat = parseFloat(document.getElementById('pMat').value) || 0;
+        const prod = parseFloat(document.getElementById('pProd').value) || 0;
+        const out = parseFloat(document.getElementById('pOut').value) || 0;
+        const margin = parseInt(document.getElementById('slider').value, 10);
+        const qty = parseInt(document.getElementById('pQty').value, 10) || 1;
+        const cost = mat + prod + out;
+        const price = calcPrice(cost, margin);
+        const profitValue = profit(cost, price);
+        const saleMargin = cost > 0 ? (profitValue / price) * 100 : 0;
+        return {
+          mat,
+          prod,
+          out,
+          cost,
+          price,
+          profit: profitValue,
+          saleMargin,
+          margin,
+          qty,
+        };
+      }
+
+      function updatePreview() {
+        const { cost, price, profit, saleMargin, margin, qty } = getInputs();
+        const preview = document.getElementById('preview');
+        if (cost <= 0) {
+          preview.innerHTML = '<span>Informe os custos para ver o preço sugerido.</span>';
+          return;
+        }
+        preview.innerHTML = `
+          <span><strong>Custo unitário:</strong> ${fmt(cost)}</span>
+          <span class="preview-price">Preço sugerido: <strong>${fmt(price)}</strong></span>
+          <span class="preview-profit">Lucro: <strong>${fmt(profit)}</strong> (${formatPercent(saleMargin)}% sobre venda)</span>
+          ${qty > 1 ? `<span class="preview-profit">Total: <strong>${fmt(price * qty)}</strong> para ${qty} unidade(s)</span>` : ''}
+          <span class="preview-profit">Markup aplicado: <strong>${margin}%</strong></span>
+        `;
+      }
+
+      function changeQty(delta) {
+        const qtyInput = document.getElementById('pQty');
+        let quantity = parseInt(qtyInput.value, 10) + delta;
+        quantity = Math.min(Math.max(quantity, 1), 9999);
+        qtyInput.value = quantity;
+        document.getElementById('qtyDisplay').textContent = quantity;
+        updatePreview();
+      }
+
+      function init() {
+        const slider = document.getElementById('slider');
+        const sliderVal = document.getElementById('sliderVal');
+        slider.addEventListener('input', () => {
+          sliderVal.textContent = `${slider.value}%`;
+          updatePreview();
+        });
+
+        ['pMat', 'pProd', 'pOut'].forEach((id) => {
+          document.getElementById(id).addEventListener('input', updatePreview);
+        });
+
+        updatePreview();
+        render();
+      }
+
+      function resetForm() {
+        document.getElementById('pName').value = '';
+        document.getElementById('pMat').value = '';
+        document.getElementById('pProd').value = '';
+        document.getElementById('pOut').value = '';
+        document.getElementById('pQty').value = '1';
+        document.getElementById('qtyDisplay').textContent = '1';
+        document.getElementById('slider').value = '50';
+        document.getElementById('sliderVal').textContent = '50%';
+        updatePreview();
+      }
+
+      function openMiniCalc() {
+        document.getElementById('miniCalcModal').classList.add('open');
+        setCalcScreen();
+      }
+
+      function closeMiniCalc() {
+        document.getElementById('miniCalcModal').classList.remove('open');
+      }
+
+      function setCalcScreen() {
+        document.getElementById('calcExpression').textContent = calcExpression || '0';
+        document.getElementById('calcResult').textContent = calcExpression ? calcExpression : '0';
+      }
+
+      function calculatorInput(value) {
+        if (value === 'C') {
+          calcExpression = '';
+        } else if (value === '⌫') {
+          calcExpression = calcExpression.slice(0, -1);
+        } else if (value === '=') {
+          evaluateCalc();
+          return;
+        } else {
+          const lastChar = calcExpression.slice(-1);
+          const operators = ['+', '-', '*', '/', '%'];
+          if (operators.includes(value) && (!calcExpression || operators.includes(lastChar))) {
+            if (value === '-') {
+              if (!calcExpression) calcExpression = '-';
+            }
+          } else {
+            calcExpression += value;
+          }
+        }
+        setCalcScreen();
+      }
+
+      function evaluateCalc() {
+        try {
+          const expression = calcExpression.replace(/÷/g, '/').replace(/×/g, '*').replace(/%/g, '/100');
+          const result = Function(`'use strict'; return (${expression})`)();
+          calcExpression = result === undefined || Number.isNaN(result) ? '' : String(result);
+        } catch {
+          calcExpression = 'Erro';
+        }
+        setCalcScreen();
+      }
+
+      function addProduct() {
+        const nameInput = document.getElementById('pName');
+        const name = nameInput.value.trim();
+        const { mat, prod, out, cost, price, profit: profitValue, saleMargin, margin, qty } = getInputs();
+
+        if (!name) {
+          showMessage('Informe o nome do produto antes de adicionar.', 'error');
+          nameInput.focus();
+          return;
+        }
+
+        if (cost <= 0) {
+          showMessage('Preencha os custos para calcular o preço.', 'error');
+          document.getElementById('pMat').focus();
+          return;
+        }
+
+        if (editId) {
+          const product = products.find((item) => item.id === editId);
+          if (!product) return;
+          const duplicate = products.find((item) => item.id !== editId && item.name.toLowerCase() === name.toLowerCase());
+          if (duplicate) {
+            showMessage('Já existe outro produto com esse nome.', 'error');
+            return;
+          }
+
+          product.name = name;
+          product.mat = mat;
+          product.prod = prod;
+          product.out = out;
+          product.cost = cost;
+          product.price = price;
+          product.profit = profitValue;
+          product.saleMargin = saleMargin;
+          product.margin = margin;
+          product.qty = qty;
+
+          showMessage(`Produto “${name}” atualizado com sucesso.`, 'success');
+          cancelEdit();
+          render();
+          return;
+        }
+
+        const existing = products.find((item) => item.name.toLowerCase() === name.toLowerCase());
+        if (existing) {
+          const newQty = existing.qty + qty;
+          existing.mat = (existing.mat * existing.qty + mat * qty) / newQty;
+          existing.prod = (existing.prod * existing.qty + prod * qty) / newQty;
+          existing.out = (existing.out * existing.qty + out * qty) / newQty;
+          existing.qty = newQty;
+          existing.cost = existing.mat + existing.prod + existing.out;
+          existing.price = calcPrice(existing.cost, margin);
+          existing.profit = profit(existing.cost, existing.price);
+          existing.saleMargin = existing.cost > 0 ? (existing.profit / existing.price) * 100 : 0;
+          existing.margin = margin;
+          showMessage(`Produto “${name}” atualizado com ${qty} unidade(s) extras.`, 'success');
+        } else {
+          products.push({
+            id: Date.now(),
+            name,
+            mat,
+            prod,
+            out,
+            cost,
+            price,
+            profit: profitValue,
+            saleMargin,
+            margin,
+            qty,
+          });
+          showMessage(`Produto “${name}” adicionado com sucesso.`, 'success');
+        }
+
+        resetForm();
+        render();
+      }
+
+      function editProduct(id) {
+        const product = products.find((item) => item.id === id);
+        if (!product) return;
+
+        editId = id;
+        document.getElementById('pName').value = product.name;
+        document.getElementById('pMat').value = product.mat.toFixed(2);
+        document.getElementById('pProd').value = product.prod.toFixed(2);
+        document.getElementById('pOut').value = product.out.toFixed(2);
+        document.getElementById('pQty').value = product.qty;
+        document.getElementById('qtyDisplay').textContent = product.qty;
+        document.getElementById('slider').value = product.margin;
+        document.getElementById('sliderVal').textContent = `${product.margin}%`;
+        document.getElementById('actionButtonText').textContent = 'Salvar alteração';
+        document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+        updatePreview();
+        showMessage(`Editando produto “${product.name}”. Faça as alterações e salve.`, '');
+      }
+
+      function cancelEdit() {
+        editId = null;
+        document.getElementById('actionButtonText').textContent = 'Adicionar à lista';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        resetForm();
+      }
+
+      function delProduct(id) {
+        const index = products.findIndex((product) => product.id === id);
+        if (index === -1) return;
+        products.splice(index, 1);
+        render();
+        showMessage('Produto removido da lista.', '');
+      }
+
+      function clearAll() {
+        if (!products.length) return;
+        if (!confirm('Deseja realmente limpar todos os produtos?')) return;
+        products.length = 0;
+        cancelEdit();
+        render();
+        showMessage('Lista de produtos limpa.', 'success');
+      }
+
+      function updateMetrics() {
+        const totals = products.reduce(
+          (acc, product) => {
+            acc.cost += product.cost * product.qty;
+            acc.rev += product.price * product.qty;
+            acc.profit += product.profit * product.qty;
+            acc.items += product.qty;
+            return acc;
+          },
+          { cost: 0, rev: 0, profit: 0, items: 0 }
+        );
+
+        document.getElementById('mProd').textContent = products.length;
+        document.getElementById('mItems').textContent = totals.items;
+        document.getElementById('mCost').textContent = fmt(totals.cost);
+        document.getElementById('mRev').textContent = fmt(totals.rev);
+        document.getElementById('mProfit').textContent = fmt(totals.profit);
+        document.getElementById('exportBtn').disabled = products.length === 0;
+        document.getElementById('clearBtn').disabled = products.length === 0;
+      }
+
+      function render() {
+        const listBody = document.getElementById('listBody');
+
+        if (!products.length) {
+          listBody.innerHTML = '<div class="empty"><i class="ti ti-inbox"></i> Nenhum produto cadastrado ainda</div>';
+          document.getElementById('chartPanel').style.display = 'none';
+          if (chart) {
+            chart.destroy();
+            chart = null;
+          }
+        } else {
+          const totals = products.reduce(
+            (acc, product) => {
+              acc.qty += product.qty;
+              acc.sales += product.price * product.qty;
+              acc.profit += product.profit * product.qty;
+              return acc;
+            },
+            { qty: 0, sales: 0, profit: 0 }
+          );
+
+          listBody.innerHTML = `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:26%">Produto</th>
+                    <th class="num" style="width:10%">Qtd</th>
+                    <th class="num" style="width:13%">Custo unit.</th>
+                    <th class="num" style="width:13%">Preço venda</th>
+                    <th class="num" style="width:12%">Lucro unit.</th>
+                    <th class="num" style="width:12%">Total vendas</th>
+                    <th class="num" style="width:10%">Margem</th>
+                    <th style="width:4%"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${products
+                    .map(
+                      (product) => `
+                    <tr>
+                      <td><div class="pname">${product.name}</div></td>
+                      <td class="num">${product.qty}×</td>
+                      <td class="num">${fmt(product.cost)}</td>
+                      <td class="num" style="color:#166534;font-weight:700">${fmt(product.price)}</td>
+                      <td class="num">${fmt(product.profit)}</td>
+                      <td class="num" style="font-weight:700">${fmt(product.price * product.qty)}</td>
+                      <td class="num"><span class="badge ${badgeClass(product.saleMargin)}">${formatPercent(product.saleMargin)}%</span></td>
+                      <td class="num">
+                        <button class="secondary-button small" type="button" onclick="editProduct(${product.id})" aria-label="Editar ${product.name}">
+                          <i class="ti ti-pencil"></i>
+                        </button>
+                        <button class="del" type="button" onclick="delProduct(${product.id})" aria-label="Remover ${product.name}"><i class="ti ti-trash"></i></button>
+                      </td>
+                    </tr>`
+                    )
+                    .join('')}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td><strong>Total</strong></td>
+                    <td class="num"><strong>${totals.qty}×</strong></td>
+                    <td></td>
+                    <td></td>
+                    <td class="num"><strong>${fmt(totals.profit)}</strong></td>
+                    <td class="num"><strong>${fmt(totals.sales)}</strong></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          `;
+          document.getElementById('chartPanel').style.display = 'block';
+          renderChart();
+        }
+
+        updateMetrics();
+      }
+
+      function renderChart() {
+        const labels = products.map((product) => (product.name.length > 14 ? product.name.slice(0, 14) + '…' : product.name));
+        const costs = products.map((product) => parseFloat((product.cost * product.qty).toFixed(2)));
+        const profits = products.map((product) => parseFloat((product.profit * product.qty).toFixed(2)));
+        const chartHeight = Math.max(260, products.length * 54 + 60);
+        document.querySelector('.chart-wrap').style.height = `${chartHeight}px`;
+
+        if (chart) {
+          chart.destroy();
+        }
+
+        chart = new Chart(document.getElementById('profChart'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Custo', data: costs, backgroundColor: '#94d3a2', borderRadius: 12, barThickness: 18 },
+              { label: 'Lucro', data: profits, backgroundColor: '#16a34a', borderRadius: 12, barThickness: 18 },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    return `${context.dataset.label}: ${fmt(context.parsed.x)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { color: 'rgba(15, 23, 42, 0.06)' },
+                ticks: { callback: (value) => fmt(value), font: { size: 12 } },
+              },
+              y: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { font: { size: 13 } },
+              },
+            },
+          },
+        });
+      }
+
+      function exportCSV() {
+        if (!products.length) {
+          showMessage('Não há produtos para exportar.', 'error');
+          return;
+        }
+
+        const header = 'Produto,Quantidade,Custo unitário,Preço de venda,Lucro unitário,Total vendas,Margem (%)\n';
+        const rows = products
+          .map((product) => [
+            `"${product.name}"`,
+            product.qty,
+            product.cost.toFixed(2),
+            product.price.toFixed(2),
+            product.profit.toFixed(2),
+            (product.price * product.qty).toFixed(2),
+            formatPercent(product.saleMargin),
+          ].join(','))
+          .join('\n');
+
+        const blob = new Blob(['\uFEFF' + header + rows], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'precificacao.csv';
+        anchor.click();
+        URL.revokeObjectURL(url);
+        showMessage('Exportação CSV gerada com sucesso.', 'success');
+      }
+
+      window.addEventListener('load', init);
+    </script>
+  </body>
+</html>
