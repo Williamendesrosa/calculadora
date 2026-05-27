@@ -597,6 +597,126 @@
           width: 100%;
         }
       }
+      /* Responsive table -> card view on small screens */
+      @media (max-width: 900px) {
+        .table-wrap table thead {
+          display: none;
+        }
+
+        .table-wrap table,
+        .table-wrap tbody {
+          width: 100%;
+        }
+
+        .table-wrap tr {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          grid-template-areas:
+            "product actions"
+            "price actions"
+            "details details";
+          gap: 8px;
+          margin-bottom: 12px;
+          padding: 12px;
+          border-radius: 14px;
+          background: var(--surface-strong);
+          border: 1px solid var(--border);
+          align-items: center;
+        }
+
+        .table-wrap td {
+          display: block;
+        }
+
+        .table-wrap tr td:nth-child(1) {
+          grid-area: product;
+        }
+
+        .table-wrap tr td:nth-child(4) {
+          grid-area: price;
+        }
+
+        .table-wrap tr td:nth-child(8) {
+          grid-area: actions;
+        }
+
+        .table-wrap tr td:nth-child(2),
+        .table-wrap tr td:nth-child(3),
+        .table-wrap tr td:nth-child(5),
+        .table-wrap tr td:nth-child(6),
+        .table-wrap tr td:nth-child(7) {
+          grid-area: details;
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .table-wrap td[data-label]:before {
+          content: attr(data-label);
+          display: block;
+          font-size: 0.82rem;
+          color: var(--text-secondary);
+          margin-bottom: 6px;
+          font-weight: 600;
+        }
+
+        .table-wrap td.num {
+          text-align: right;
+        }
+
+        .secondary-button.small,
+        .del {
+          padding: 10px 12px;
+          min-width: 48px;
+          height: 44px;
+        }
+
+        .secondary-button.small i,
+        .del i {
+          font-size: 18px;
+        }
+      }
+      @media (max-width: 480px) {
+        .table-wrap tr {
+          padding: 14px;
+        }
+
+        .table-wrap td[data-label]:before {
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .table-wrap td input,
+        .table-wrap td input[type='number'],
+        .table-wrap td input[type='text'] {
+          width: 100%;
+          margin-bottom: 8px;
+        }
+
+        .secondary-button.small,
+        .del {
+          min-width: 44px;
+          height: 40px;
+          padding: 6px 10px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .secondary-button.small i,
+        .del i {
+          font-size: 16px;
+        }
+
+        .panel {
+          padding: 16px;
+        }
+
+        .pname {
+          font-size: 0.95rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -777,6 +897,15 @@
         return margin >= 40 ? 'bg' : margin >= 20 ? 'bm' : 'br';
       }
 
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       function showMessage(text, type = '') {
         const message = document.getElementById('message');
         message.textContent = text;
@@ -850,6 +979,8 @@
         });
 
         updatePreview();
+        // load demo data when requested via URL hash or query
+        if (location.hash === '#demo' || new URLSearchParams(location.search).get('demo') === '1') demoData();
         render();
       }
 
@@ -1092,22 +1223,48 @@
                 <tbody>
                   ${products
                     .map(
-                      (product) => `
+                      (product) =>
+                        product.editing
+                          ? `
                     <tr>
-                      <td><div class="pname">${product.name}</div></td>
-                      <td class="num">${product.qty}×</td>
-                      <td class="num">${fmt(product.cost)}</td>
-                      <td class="num" style="color:#166534;font-weight:700">${fmt(product.price)}</td>
-                      <td class="num">${fmt(product.profit)}</td>
-                      <td class="num" style="font-weight:700">${fmt(product.price * product.qty)}</td>
-                      <td class="num"><span class="badge ${badgeClass(product.saleMargin)}">${formatPercent(product.saleMargin)}%</span></td>
-                      <td class="num">
-                        <button class="secondary-button small" type="button" onclick="editProduct(${product.id})" aria-label="Editar ${product.name}">
+                      <td data-label="Produto">
+                        <input type="text" id="edit-name-${product.id}" value="${escapeHtml(product.name)}" style="width:100%;border-radius:10px;padding:8px;border:1px solid var(--border)" />
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                          <input type="number" id="edit-mat-${product.id}" value="${product.mat.toFixed(2)}" step="0.01" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
+                          <input type="number" id="edit-prod-${product.id}" value="${product.prod.toFixed(2)}" step="0.01" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
+                          <input type="number" id="edit-out-${product.id}" value="${product.out.toFixed(2)}" step="0.01" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
+                        </div>
+                      </td>
+                      <td class="num" data-label="Qtd"><input type="number" id="edit-qty-${product.id}" value="${product.qty}" min="1" style="width:84px;padding:6px;border-radius:8px;border:1px solid var(--border)" /></td>
+                      <td class="num" data-label="Custo unit.">${fmt(product.cost)}</td>
+                      <td class="num" data-label="Preço venda">${fmt(product.price)}</td>
+                      <td class="num" data-label="Lucro unit.">${fmt(product.profit)}</td>
+                      <td class="num" data-label="Total vendas">${fmt(product.price * product.qty)}</td>
+                      <td class="num" data-label="Margem"><input type="number" id="edit-margin-${product.id}" value="${product.margin}" min="0" max="1000" style="width:84px;padding:6px;border-radius:8px;border:1px solid var(--border)" />%</td>
+                      <td class="num" data-label="">
+                        <button class="secondary-button small" type="button" onclick="saveInlineEdit(${product.id})">Salvar</button>
+                        <button class="secondary-button small" type="button" onclick="cancelInlineEdit(${product.id})">Cancelar</button>
+                      </td>
+                    </tr>
+                  `
+                          : `
+                    <tr>
+                      <td data-label="Produto"><div class="pname">${escapeHtml(product.name)}</div></td>
+                      <td class="num" data-label="Qtd">${product.qty}×</td>
+                      <td class="num" data-label="Custo unit.">${fmt(product.cost)}</td>
+                      <td class="num" data-label="Preço venda" style="color:#166534;font-weight:700">${fmt(product.price)}</td>
+                      <td class="num" data-label="Lucro unit.">${fmt(product.profit)}</td>
+                      <td class="num" data-label="Total vendas" style="font-weight:700">${fmt(product.price * product.qty)}</td>
+                      <td class="num" data-label="Margem"><span class="badge ${badgeClass(product.saleMargin)}">${formatPercent(product.saleMargin)}%</span></td>
+                      <td class="num" data-label="">
+                        <button class="secondary-button small" type="button" onclick="startInlineEdit(${product.id})" aria-label="Editar ${escapeHtml(product.name)}">
                           <i class="ti ti-pencil"></i>
                         </button>
-                        <button class="del" type="button" onclick="delProduct(${product.id})" aria-label="Remover ${product.name}"><i class="ti ti-trash"></i></button>
+                        <button class="del" type="button" onclick="delProduct(${product.id})" aria-label="Remover ${escapeHtml(product.name)}"><i class="ti ti-trash"></i></button>
+                        <button class="secondary-button small" type="button" onclick="editProduct(${product.id})" title="Editar no formulário">Form</button>
                       </td>
-                    </tr>`
+                    </tr>
+                  `
                     )
                     .join('')}
                 </tbody>
@@ -1181,6 +1338,97 @@
             },
           },
         });
+      }
+
+      /* Demo/test data loader (use ?demo=1 or add #demo to URL) */
+      function demoData() {
+        products.length = 0;
+        const now = Date.now();
+        const sample = [
+          { id: now + 1, name: 'Caneca personalizada', mat: 6.5, prod: 3.0, out: 1.2, qty: 2, margin: 50 },
+          { id: now + 2, name: 'Camiseta silk', mat: 12.0, prod: 8.0, out: 2.5, qty: 1, margin: 60 },
+          { id: now + 3, name: 'Adesivo 10x10', mat: 1.2, prod: 0.5, out: 0.3, qty: 10, margin: 40 },
+        ];
+
+        sample.forEach((s) => {
+          const cost = s.mat + s.prod + s.out;
+          const price = calcPrice(cost, s.margin);
+          const prof = profit(cost, price);
+          const saleMargin = cost > 0 ? (prof / price) * 100 : 0;
+          products.push({
+            id: s.id,
+            name: s.name,
+            mat: s.mat,
+            prod: s.prod,
+            out: s.out,
+            cost,
+            price,
+            profit: prof,
+            saleMargin,
+            margin: s.margin,
+            qty: s.qty,
+          });
+        });
+        showMessage('Dados de demonstração carregados. Teste em mobile/tablet.', '');
+      }
+
+      /* Inline edit helpers for rows */
+      function startInlineEdit(id) {
+        const p = products.find((item) => item.id === id);
+        if (!p) return;
+        p.editing = true;
+        render();
+        // focus first input after render
+        setTimeout(() => {
+          const el = document.getElementById(`edit-name-${id}`);
+          if (el) el.focus();
+        }, 40);
+      }
+
+      function saveInlineEdit(id) {
+        const p = products.find((item) => item.id === id);
+        if (!p) return;
+        const nameEl = document.getElementById(`edit-name-${id}`);
+        const matEl = document.getElementById(`edit-mat-${id}`);
+        const prodEl = document.getElementById(`edit-prod-${id}`);
+        const outEl = document.getElementById(`edit-out-${id}`);
+        const qtyEl = document.getElementById(`edit-qty-${id}`);
+        const marginEl = document.getElementById(`edit-margin-${id}`);
+
+        const name = nameEl ? nameEl.value.trim() : p.name;
+        const mat = matEl ? parseFloat(matEl.value) || 0 : p.mat;
+        const prod = prodEl ? parseFloat(prodEl.value) || 0 : p.prod;
+        const out = outEl ? parseFloat(outEl.value) || 0 : p.out;
+        const qty = qtyEl ? Math.max(1, parseInt(qtyEl.value, 10) || 1) : p.qty;
+        const margin = marginEl ? parseInt(marginEl.value, 10) || p.margin : p.margin;
+
+        if (!name) {
+          showMessage('Nome do produto não pode ficar vazio.', 'error');
+          if (nameEl) nameEl.focus();
+          return;
+        }
+
+        p.name = name;
+        p.mat = mat;
+        p.prod = prod;
+        p.out = out;
+        p.qty = qty;
+        p.margin = margin;
+        p.cost = mat + prod + out;
+        p.price = calcPrice(p.cost, p.margin);
+        p.profit = profit(p.cost, p.price);
+        p.saleMargin = p.cost > 0 ? (p.profit / p.price) * 100 : 0;
+        delete p.editing;
+        render();
+        showMessage(`Produto "${p.name}" atualizado.`, 'success');
+      }
+
+      function cancelInlineEdit(id) {
+        const p = products.find((item) => item.id === id);
+        if (!p) return;
+        delete p.editing;
+        render();
+        showMessage('Edição cancelada.', '');
       }
 
       function exportCSV() {
