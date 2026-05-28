@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -393,6 +393,10 @@
         font-weight: 700;
       }
 
+      .action-label {
+        display: none;
+      }
+
       .bg {
         background: #dcfce7;
         color: #166534;
@@ -604,52 +608,32 @@
         }
 
         .table-wrap table,
-        .table-wrap tbody {
+        .table-wrap tbody,
+        .table-wrap tr,
+        .table-wrap th,
+        .table-wrap td {
+          display: block;
           width: 100%;
         }
 
         .table-wrap tr {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          grid-template-areas:
-            "product actions"
-            "price actions"
-            "details details";
-          gap: 8px;
-          margin-bottom: 12px;
-          padding: 12px;
-          border-radius: 14px;
+          margin-bottom: 14px;
+          padding: 16px;
+          border-radius: 18px;
           background: var(--surface-strong);
           border: 1px solid var(--border);
-          align-items: center;
+          transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .table-wrap tr.editing {
+          background: var(--surface);
+          border-color: rgba(37, 99, 235, 0.24);
+          box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
         }
 
         .table-wrap td {
-          display: block;
-        }
-
-        .table-wrap tr td:nth-child(1) {
-          grid-area: product;
-        }
-
-        .table-wrap tr td:nth-child(4) {
-          grid-area: price;
-        }
-
-        .table-wrap tr td:nth-child(8) {
-          grid-area: actions;
-        }
-
-        .table-wrap tr td:nth-child(2),
-        .table-wrap tr td:nth-child(3),
-        .table-wrap tr td:nth-child(5),
-        .table-wrap tr td:nth-child(6),
-        .table-wrap tr td:nth-child(7) {
-          grid-area: details;
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-          align-items: center;
+          padding: 10px 0;
+          border: none;
         }
 
         .table-wrap td[data-label]:before {
@@ -661,8 +645,26 @@
           font-weight: 600;
         }
 
-        .table-wrap td.num {
-          text-align: right;
+        .table-wrap td:last-child {
+          padding-top: 12px;
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .table-wrap td:last-child button {
+          flex: 1 1 120px;
+          min-width: 120px;
+        }
+
+        .table-wrap td:last-child .action-label {
+          display: inline-block;
+          margin-left: 6px;
+        }
+
+        .action-label {
+          display: inline-block;
         }
 
         .secondary-button.small,
@@ -677,28 +679,38 @@
           font-size: 18px;
         }
       }
+
       @media (max-width: 480px) {
         .table-wrap tr {
-          padding: 14px;
+          padding: 16px;
         }
 
         .table-wrap td[data-label]:before {
-          font-size: 0.8rem;
-          font-weight: 600;
+          font-size: 0.78rem;
+          font-weight: 700;
         }
 
         .table-wrap td input,
         .table-wrap td input[type='number'],
         .table-wrap td input[type='text'] {
           width: 100%;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
+        }
+
+        .table-wrap td:last-child {
+          gap: 6px;
+        }
+
+        .table-wrap td:last-child button {
+          flex: 1 1 100%;
+          min-width: 100%;
         }
 
         .secondary-button.small,
         .del {
           min-width: 44px;
-          height: 40px;
-          padding: 6px 10px;
+          height: 42px;
+          padding: 8px 10px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -714,7 +726,7 @@
         }
 
         .pname {
-          font-size: 0.95rem;
+          font-size: 0.96rem;
         }
       }
     </style>
@@ -786,15 +798,15 @@
         <div class="row3">
           <div class="field">
             <label for="pMat">Material (R$)</label>
-            <input type="number" id="pMat" placeholder="0,00" min="0" step="0.01" />
+            <input type="text" id="pMat" inputmode="decimal" placeholder="0,00" />
           </div>
           <div class="field">
             <label for="pProd">Produção / mão de obra (R$)</label>
-            <input type="number" id="pProd" placeholder="0,00" min="0" step="0.01" />
+            <input type="text" id="pProd" inputmode="decimal" placeholder="0,00" />
           </div>
           <div class="field">
             <label for="pOut">Outros (frete, emb.) (R$)</label>
-            <input type="number" id="pOut" placeholder="0,00" min="0" step="0.01" />
+            <input type="text" id="pOut" inputmode="decimal" placeholder="0,00" />
           </div>
         </div>
 
@@ -893,6 +905,32 @@
         return Number.isFinite(value) ? value.toFixed(1) : '0.0';
       }
 
+      function parseCurrencyString(value) {
+        const normalized = String(value)
+          .trim()
+          .replace(/\./g, '')
+          .replace(/,/g, '.')
+          .replace(/[^0-9.-]/g, '');
+        const number = parseFloat(normalized);
+        return Number.isFinite(number) ? number : 0;
+      }
+
+      function formatCurrencyString(value) {
+        return Number.isFinite(value)
+          ? value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : '';
+      }
+
+      function formatCurrencyInputOnBlur(event) {
+        const raw = event.target.value.trim();
+        event.target.value = raw ? formatCurrencyString(parseCurrencyString(raw)) : '';
+      }
+
+      function unformatCurrencyInputOnFocus(event) {
+        const value = parseCurrencyString(event.target.value);
+        event.target.value = value ? String(value).replace('.', ',') : '';
+      }
+
       function badgeClass(margin) {
         return margin >= 40 ? 'bg' : margin >= 20 ? 'bm' : 'br';
       }
@@ -919,9 +957,9 @@
       }
 
       function getInputs() {
-        const mat = parseFloat(document.getElementById('pMat').value) || 0;
-        const prod = parseFloat(document.getElementById('pProd').value) || 0;
-        const out = parseFloat(document.getElementById('pOut').value) || 0;
+        const mat = parseCurrencyString(document.getElementById('pMat').value);
+        const prod = parseCurrencyString(document.getElementById('pProd').value);
+        const out = parseCurrencyString(document.getElementById('pOut').value);
         const margin = parseInt(document.getElementById('slider').value, 10);
         const qty = parseInt(document.getElementById('pQty').value, 10) || 1;
         const cost = mat + prod + out;
@@ -975,7 +1013,10 @@
         });
 
         ['pMat', 'pProd', 'pOut'].forEach((id) => {
-          document.getElementById(id).addEventListener('input', updatePreview);
+          const input = document.getElementById(id);
+          input.addEventListener('input', updatePreview);
+          input.addEventListener('blur', formatCurrencyInputOnBlur);
+          input.addEventListener('focus', unformatCurrencyInputOnFocus);
         });
 
         updatePreview();
@@ -1126,9 +1167,9 @@
 
         editId = id;
         document.getElementById('pName').value = product.name;
-        document.getElementById('pMat').value = product.mat.toFixed(2);
-        document.getElementById('pProd').value = product.prod.toFixed(2);
-        document.getElementById('pOut').value = product.out.toFixed(2);
+        document.getElementById('pMat').value = formatCurrencyString(product.mat);
+        document.getElementById('pProd').value = formatCurrencyString(product.prod);
+        document.getElementById('pOut').value = formatCurrencyString(product.out);
         document.getElementById('pQty').value = product.qty;
         document.getElementById('qtyDisplay').textContent = product.qty;
         document.getElementById('slider').value = product.margin;
@@ -1226,13 +1267,13 @@
                       (product) =>
                         product.editing
                           ? `
-                    <tr>
+                    <tr class="editing">
                       <td data-label="Produto">
                         <input type="text" id="edit-name-${product.id}" value="${escapeHtml(product.name)}" style="width:100%;border-radius:10px;padding:8px;border:1px solid var(--border)" />
                         <div style="display:flex;gap:8px;margin-top:8px;">
-                          <input type="number" id="edit-mat-${product.id}" value="${product.mat.toFixed(2)}" step="0.01" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
-                          <input type="number" id="edit-prod-${product.id}" value="${product.prod.toFixed(2)}" step="0.01" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
-                          <input type="number" id="edit-out-${product.id}" value="${product.out.toFixed(2)}" step="0.01" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
+                          <input type="text" inputmode="decimal" id="edit-mat-${product.id}" value="${formatCurrencyString(product.mat)}" onfocus="unformatCurrencyInputOnFocus(event)" onblur="formatCurrencyInputOnBlur(event)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
+                          <input type="text" inputmode="decimal" id="edit-prod-${product.id}" value="${formatCurrencyString(product.prod)}" onfocus="unformatCurrencyInputOnFocus(event)" onblur="formatCurrencyInputOnBlur(event)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
+                          <input type="text" inputmode="decimal" id="edit-out-${product.id}" value="${formatCurrencyString(product.out)}" onfocus="unformatCurrencyInputOnFocus(event)" onblur="formatCurrencyInputOnBlur(event)" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--border)" />
                         </div>
                       </td>
                       <td class="num" data-label="Qtd"><input type="number" id="edit-qty-${product.id}" value="${product.qty}" min="1" style="width:84px;padding:6px;border-radius:8px;border:1px solid var(--border)" /></td>
@@ -1259,9 +1300,12 @@
                       <td class="num" data-label="">
                         <button class="secondary-button small" type="button" onclick="startInlineEdit(${product.id})" aria-label="Editar ${escapeHtml(product.name)}">
                           <i class="ti ti-pencil"></i>
+                          <span class="action-label">Editar</span>
                         </button>
-                        <button class="del" type="button" onclick="delProduct(${product.id})" aria-label="Remover ${escapeHtml(product.name)}"><i class="ti ti-trash"></i></button>
-                        <button class="secondary-button small" type="button" onclick="editProduct(${product.id})" title="Editar no formulário">Form</button>
+                        <button class="del" type="button" onclick="delProduct(${product.id})" aria-label="Remover ${escapeHtml(product.name)}">
+                          <i class="ti ti-trash"></i>
+                          <span class="action-label">Excluir</span>
+                        </button>
                       </td>
                     </tr>
                   `
@@ -1396,9 +1440,9 @@
         const marginEl = document.getElementById(`edit-margin-${id}`);
 
         const name = nameEl ? nameEl.value.trim() : p.name;
-        const mat = matEl ? parseFloat(matEl.value) || 0 : p.mat;
-        const prod = prodEl ? parseFloat(prodEl.value) || 0 : p.prod;
-        const out = outEl ? parseFloat(outEl.value) || 0 : p.out;
+        const mat = matEl ? parseCurrencyString(matEl.value) : p.mat;
+        const prod = prodEl ? parseCurrencyString(prodEl.value) : p.prod;
+        const out = outEl ? parseCurrencyString(outEl.value) : p.out;
         const qty = qtyEl ? Math.max(1, parseInt(qtyEl.value, 10) || 1) : p.qty;
         const margin = marginEl ? parseInt(marginEl.value, 10) || p.margin : p.margin;
 
