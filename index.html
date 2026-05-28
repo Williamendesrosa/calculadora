@@ -260,6 +260,20 @@
         white-space: nowrap;
       }
 
+      .margin-control label {
+        font-size: 0.98rem;
+        color: var(--text-primary);
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .margin-hint {
+        display: block;
+        font-size: 0.82rem;
+        color: var(--text-tertiary);
+        margin-top: 4px;
+      }
+
       .margin-row input[type='range'] {
         width: 100%;
       }
@@ -586,6 +600,12 @@
         background: var(--surface);
       }
 
+      /* ensure qty +/- buttons remain visible and active */
+      .qty-field button {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
       .qty-num {
         min-width: 44px;
         text-align: center;
@@ -829,21 +849,24 @@
         <div class="row3">
           <div class="field">
             <label for="pMat">Material (R$)</label>
-            <input type="text" id="pMat" inputmode="decimal" placeholder="0,00" />
+            <input type="text" id="pMat" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0,00" />
           </div>
           <div class="field">
             <label for="pProd">Produção / mão de obra (R$)</label>
-            <input type="text" id="pProd" inputmode="decimal" placeholder="0,00" />
+            <input type="text" id="pProd" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0,00" />
           </div>
           <div class="field">
             <label for="pOut">Outros (frete, emb.) (R$)</label>
-            <input type="text" id="pOut" inputmode="decimal" placeholder="0,00" />
+            <input type="text" id="pOut" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0,00" />
           </div>
         </div>
 
         <div class="margin-row">
-          <label for="slider"><i class="ti ti-percentage"></i> Margem desejada</label>
-          <input type="range" id="slider" min="5" max="200" step="1" value="50" />
+          <div class="margin-control" style="display:flex;flex-direction:column;gap:6px;">
+            <label for="slider"><i class="ti ti-percentage"></i> Margem desejada</label>
+            <small class="margin-hint">Use o slider ou as setas para ajustar a margem</small>
+            <input type="range" id="slider" min="5" max="200" step="1" value="50" />
+          </div>
           <div class="margin-input-wrapper">
             <input
               type="number"
@@ -857,7 +880,7 @@
             />
             <span>%</span>
           </div>
-          <span class="margin-badge" id="sliderVal">50%</span>
+          
         </div>
 
         <div class="preview-row" id="preview"></div>
@@ -919,6 +942,7 @@
             <button class="mini-calc-button" type="button" onclick="calculatorInput('3')">3</button>
             <button class="mini-calc-button operator" type="button" onclick="calculatorInput('+')">+</button>
             <button class="mini-calc-button wide" type="button" onclick="calculatorInput('0')">0</button>
+            <button class="mini-calc-button" type="button" onclick="calculatorInput(',')">,</button>
             <button class="mini-calc-button" type="button" onclick="calculatorInput('.')">.</button>
             <button class="mini-calc-button operator" type="button" onclick="calculatorInput('=')">=</button>
           </div>
@@ -1050,14 +1074,12 @@
 
       function init() {
         const slider = document.getElementById('slider');
-        const sliderVal = document.getElementById('sliderVal');
         const marginInput = document.getElementById('marginInput');
 
         function syncMargin(value) {
           const normalized = Number.isFinite(value) ? Math.min(Math.max(value, 5), 200) : 50;
           slider.value = normalized;
           marginInput.value = normalized;
-          sliderVal.textContent = `${normalized}%`;
         }
 
         slider.addEventListener('input', () => {
@@ -1095,7 +1117,7 @@
         document.getElementById('qtyDisplay').textContent = '1';
         document.getElementById('slider').value = '50';
         document.getElementById('marginInput').value = '50';
-        document.getElementById('sliderVal').textContent = '50%';
+        
         updatePreview();
       }
 
@@ -1122,6 +1144,8 @@
           evaluateCalc();
           return;
         } else {
+          // accept comma as decimal separator and normalize to dot internally
+          if (value === ',') value = '.';
           const lastChar = calcExpression.slice(-1);
           const operators = ['+', '-', '*', '/', '%'];
           if (operators.includes(value) && (!calcExpression || operators.includes(lastChar))) {
@@ -1137,7 +1161,12 @@
 
       function evaluateCalc() {
         try {
-          const expression = calcExpression.replace(/÷/g, '/').replace(/×/g, '*').replace(/%/g, '/100');
+          // normalize commas to dots, handle unicode decimal variants, then evaluate
+          const expression = String(calcExpression)
+            .replace(/,/g, '.')
+            .replace(/÷/g, '/')
+            .replace(/×/g, '*')
+            .replace(/%/g, '/100');
           const result = Function(`'use strict'; return (${expression})`)();
           calcExpression = result === undefined || Number.isNaN(result) ? '' : String(result);
         } catch {
@@ -1236,7 +1265,6 @@
         document.getElementById('qtyDisplay').textContent = product.qty;
         document.getElementById('slider').value = product.margin;
         document.getElementById('marginInput').value = product.margin;
-        document.getElementById('sliderVal').textContent = `${product.margin}%`;
         document.getElementById('actionButtonText').textContent = 'Salvar alteração';
         document.getElementById('cancelEditBtn').style.display = 'inline-flex';
         updatePreview();
